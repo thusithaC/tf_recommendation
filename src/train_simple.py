@@ -5,7 +5,7 @@ import tensorflow as tf
 import pandas as pd
 from models.recomender_model import DEFAULTS, RecommenderModel
 from utils.mongo_helper import insert_one
-from utils.common import get_mapped_tensor, get_integer_lookup_layer
+from utils.common import get_mapped_tensor, get_integer_lookup_layer, get_train_test_split
 
 tf.random.set_seed(42)
 USE_MOD_URL = 'https://tfhub.dev/google/universal-sentence-encoder/4'
@@ -32,12 +32,7 @@ user_ids_vocabulary = get_integer_lookup_layer(events_dt, "user_id")
 item_ids_vocabulary = get_integer_lookup_layer(events_dt, "item_id")
 
 # Crete train test data
-shuffled_data = events_ds.shuffle(len(events_ds))
-n_train = int(len(events_ds)*params["train_test_split"])
-n_test = len(events_ds) - n_train
-train = shuffled_data.take(n_train)
-test = shuffled_data.skip(n_train).take(n_test)
-print(len(train), len(test))
+train, test = get_train_test_split(events_ds, params["train_test_split"])
 
 # build model
 model = RecommenderModel(user_ids_vocabulary, item_ids_vocabulary, items_ds, dense_layers=params["dense_layers"])
